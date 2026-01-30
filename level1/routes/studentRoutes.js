@@ -32,49 +32,56 @@ const students = [
 },
 
 ]
-const PORT = 3000;
 
-router.use(express.json());
+// 1. No need to add Port number here
+// 2. Routes assumes that body is already parseble
+// 3. filter returns array; find returns element
 
 
 router.get("/", (req,res) => {
     return res.json(students);
 })
 router.get("/:id", (req,res) => {
-    let student = students.filter((s => s.id == req.params.id));
+    let student = students.find((s => s.id == req.params.id));
+    if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+    }
     return res.status(200).json(student);
 })
 
 // post
 router.post("/", (req,res) => {
-    const name = res.body.name;
-    const email = res.body.email;
+    const name = req.body.name;
+    const email = req.body.email;
     const id = students[students.length - 1].id + 1;
-    const age = res.body.age;
-    const course =res.body.course;
+    const age = req.body.age;
+    const course =req.body.course;
 
-    if(!name || !email || !id || !age || !course){
+    if(!name || !email || !age || !course){
         console.log("Please provide all the valid fields");
-        return res.status(500).send("Missing Fields");
+        return res.status(400).send("Missing Fields");
     }
 
 
     const newS = {name, email, id, age, course};
     students.push(newS);
-    return res.status(200).send("New student successfully added");
+    return res.status(201).send("New student successfully added");
 
 })
 
 // put
 router.put("/:id", (req,res) => {
-    const userId = res.params.id;
+    const userId = req.params.id;
     
     const newName = req.body.name;
-    const newEmail = res.body.emai;
+    const newEmail = req.body.email;
     if(!newName || !newEmail) return res.status(500).send("Missing new name and email");
 
 
-    const tempS = students.filter((s => s.id == userId));
+    const tempS = students.find((s => s.id == userId));
+    if (!tempS) {
+        return res.status(404).json({ message: "Student not found" });
+        }
 
     tempS.name = newName;
     tempS.email = newEmail;
@@ -85,10 +92,11 @@ router.put("/:id", (req,res) => {
 
 //delete
 router.delete("/:id", (req,res) => {
-    const userId = res.params.id;
+    const userId = req.params.id;
+    const idx = students.findIndex(s => s.id == userId);
     if(idx == -1) return res.status(500).send("No such user exists");
 
-    const idx = students.findIndex(s => s.id == userId);
+
     students.splice(idx,1);
 
     return res.status(200).send("User with ID $userId is successfully deleted")
