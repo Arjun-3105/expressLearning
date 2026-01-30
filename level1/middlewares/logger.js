@@ -1,6 +1,5 @@
-function logger(req, res, next){
-    let time = Date.now();
-    console.log("time");
-    next();
+function logger(req, res, next) {
+  const time = new Date().toISOString();
+  console.log(`[${time}] ${req.method} ${req.originalUrl}`);
+  next();
 }
-
